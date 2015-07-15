@@ -1,0 +1,23 @@
+- name: update machine with latest packages
+  action: command yum -y update
+
+- name: install the 'Development tools' package group
+  yum: name="@Development tools" state=present
+
+- name: Install required packages
+  yum: "pkg={{ item }} state=installed"
+  with_items:
+    - zlib
+    - zlib-devel
+    - readline-devel
+    - openssl-static
+    - openssl-devel
+    - pkgconfig
+    - git-core
+    - libyaml-devel
+    - libxml2-devel
+    - libffi-devel
+    - redhat-lsb
+    - postgresql93-devel
+    - postgresql93
+    - ImageMagick

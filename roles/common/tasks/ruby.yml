@@ -1,0 +1,38 @@
+- name: Install nodejs
+  yum: name=npm state=present enablerepo=epel
+
+# Install correct version of ruby from source
+- name: ruby-from-src | ensure directory temporary ruby download directory is present
+  file: state=directory path={{rubyTmpDir}}
+
+- name: ruby-from-src | Download ruby source
+  get_url: url={{rubyUrl}} dest={{rubyTmpDir}}
+
+- name: ruby-from-src | ensure ruby is extracted
+  command: tar -xf {{rubyCompressedFile}} chdir={{rubyTmpDir}} creates={{tmpRubyPath}}
+
+- name: ruby-from-src | ensure ruby is configured
+  command: ./configure --enable-shared chdir={{tmpRubyPath}} creates={{tmpRubyPath}}/Makefile
+
+- name: ruby-from-src | ensure ruby is compiled
+  command: make chdir={{tmpRubyPath}} creates={{tmpRubyPath}}/ruby
+
+- name: ruby-from-src | ensure ruby is installed
+  command: make install chdir={{tmpRubyPath}} creates=/usr/local/bin/ruby
+
+- name: Add ruby symlinks.
+  file: >
+    src=/usr/local/bin/{{ item }}
+    dest=/usr/bin/{{ item }}
+    state=link
+    force=yes
+  with_items:
+    - erb
+    - gem
+    - irb
+    - rake
+    - rdoc
+    - ruby
+
+- name: Install Bundler
+  command: gem install bundler

@@ -1,0 +1,45 @@
+upstream upstream_{{ app_name }} {
+  server unix://{{shared_directory}}/tmp/sockets/unicorn.sock;
+  # server unix://{{shared_directory}}/tmp/sockets/puma.sock;
+}
+
+server {
+  listen 80;
+
+  server_name {{ listen_domain }};
+  root {{ app_directory }}/current/public;
+
+  access_log {{shared_directory}}/log/nginx.access.log main;
+  error_log {{shared_directory}}/log/nginx.error.log notice;
+
+  location @app_{{app_name}} {
+    index index.html index.htm;
+
+    # needed to forward user's IP address to rails
+    proxy_set_header  X-Real-IP         $remote_addr;
+    proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header  Host              $http_host;
+    proxy_set_header  X-Queue-Start     't=${msec}000';
+
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    proxy_pass http://upstream_{{app_name}};
+  }
+
+  location / {
+    try_files $uri $uri/index.html $uri.html @app_{{app_name}};
+  }
+
+  # set Expire header on assets: see http://developer.yahoo.com/performance/rules.html#expires
+  location ~ ^/(images|assets|javascripts|stylesheets)/ {
+    try_files  $uri $uri/index.html @app_{{app_name}};
+    expires 10y;
+    gzip_static on;
+    log_not_found off;
+  }
+
+  location = /500.html {
+    root {{ app_directory }}/current/public;
+  }
+}

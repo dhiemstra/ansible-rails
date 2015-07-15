@@ -1,0 +1,11 @@
+- name: Make shared folders
+  file: path={{item}} group=deploy owner=deploy state=directory
+  with_items:
+    - "{{shared_directory}}/tmp/sockets"
+    - "{{shared_directory}}/tmp/pids"
+
+- name: Upload puma config file
+  template: src=puma.rb.j2 dest={{shared_directory}}/config/puma.rb group=deploy owner=deploy force=yes
+
+- name: Upload unicorn config file
+  template: src=unicorn.rb.j2 dest={{shared_directory}}/config/unicorn.rb group=deploy owner=deploy force=yes

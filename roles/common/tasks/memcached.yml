@@ -1,0 +1,12 @@
+---
+- name: Install memcached server
+  yum: pkg=memcached state=installed
+
+- name: Install header files
+  yum: pkg=libmemcached-devel state=installed
+
+- name: Install configuration file
+  template: src=memcached.conf.j2 dest=/etc/memcached.conf
+
+- name: Start memcached
+  action: service name=memcached state=started enabled=yes

@@ -1,0 +1,33 @@
+## webapp
+listen_domain: _
+mount_dev: xvdb
+mount_dir: /data
+app_name: salonized
+app_directory: "/data/{{app_name}}"
+current_directory: "{{app_directory}}/current"
+shared_directory: "{{app_directory}}/shared"
+
+## database info
+db_host: YALAH
+db_name: **
+db_user: p0rn
+db_pass: xx
+
+## stolen from https://github.com/jgrowl/ansible-playbook-ruby-from-src
+rubyTmpDir: /usr/local/src
+rubyUrl: http://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.2.tar.gz
+rubyCompressedFile: ruby-2.2.2.tar.gz
+rubyName: ruby-2.2.2
+tmpRubyPath: "{{rubyTmpDir}}/{{rubyName}}"
+
+## newrelic stuff
+newrelic_license_key: xxx
+newrelic_loglevel: info
+newrelic_logfile: /var/log/newrelic/nrsysmond.log
+newrelic_proxy: False
+newrelic_ssl: "false"
+newrelic_ssl_ca_bundle: False
+newrelic_ssl_ca_path: False
+newrelic_pidfile: /var/run/newrelic/nrsysmond.pid
+newrelic_collector_host: collector.newrelic.com
+newrelic_timeout: 30

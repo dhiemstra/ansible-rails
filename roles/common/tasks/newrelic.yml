@@ -1,0 +1,24 @@
+- name: Add source
+  yum: name=https://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm state=present
+
+- name: Install sysmond
+  yum: pkg=newrelic-sysmond
+
+- name: Create config folder
+  file: state=directory path=/etc/newrelic
+
+- name: Configure New Relic Sysmond
+  template:
+    src: nrsysmond.cfg.j2
+    dest: /etc/newrelic/nrsysmond.cfg
+    group: newrelic
+    owner: root
+    mode: 0640
+  notify:
+    - restart new relic
+
+- name: Ensure New Relic Sysmond is started and enabled
+  service:
+    name: newrelic-sysmond
+    state: started
+    enabled: yes

@@ -1,0 +1,41 @@
+- name: Create deployment user
+  user: name=deploy comment="Application deployment user"
+- authorized_key: user=deploy key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- name: Create deploy directory structure
+  file: path={{item}} owner=deploy group=deploy state=directory
+  with_items:
+    - "{{app_directory}}"
+    - "{{app_directory}}/releases"
+    - "{{app_directory}}/releases/initial"
+
+- stat: path="{{current_directory}}"
+  register: current_folder
+
+- file: src={{app_directory}}/releases/initial dest={{current_directory}} state=link
+  when: current_folder.stat.exists == False
+
+- template: src=index.html.j2 dest={{app_directory}}/releases/initial/index.html owner=deploy group=deploy
+
+- name: Upload ssh deploy key
+  copy: src={{item}} dest=/home/deploy/.ssh/{{item}} owner=deploy group=deploy mode=0600
+  with_items:
+    - id_rsa
+    - id_rsa.pub
+
+- name: Make shared directories
+  file: path={{shared_directory}}/{{item}} group=deploy owner=deploy state=directory
+  with_items:
+    - tmp
+    - log
+    - public
+    - bundle
+    - bin
+    - config
+  tags: shared
+
+- name: Install database.yml
+  template: src=database.yml.j2 dest={{shared_directory}}/config/database.yml force=yes mode=755 owner=deploy
+
+- name: Install environment vars
+  template: src=env.production.j2 dest={{shared_directory}}/.env.production force=yes mode=755 owner=deploy

@@ -1,0 +1,23 @@
+threads 8, 22
+workers %x(grep -c processor /proc/cpuinfo)
+environment "production"
+
+bind "unix://{{shared_directory}}/tmp/sockets/puma.sock"
+pidfile "{{shared_directory}}/tmp/pids/puma.pid"
+state_path "{{shared_directory}}/tmp/pids/puma.state"
+
+stdout_redirect '{{shared_directory}}/log/puma_access.log', '{{shared_directory}}/log/puma_error.log'
+
+# rackup "{{app_directory}}/current/config.ru"
+
+activate_control_app "unix://{{shared_directory}}/tmp/sockets/pumactl.sock"
+
+on_worker_boot do
+  require "active_record"
+
+  rails_env = ENV['RAILS_ENV'] || 'production'
+  config_path = File.expand_path('../database.yml', __FILE__)
+
+  ActiveRecord::Base.connection.disconnect! rescue ActiveRecord::ConnectionNotEstablished
+  ActiveRecord::Base.establish_connection(YAML.load_file(config_path)[rails_env])
+end

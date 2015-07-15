@@ -1,0 +1,6 @@
+- name: install xfsprogs
+  action: yum pkg=xfsprogs state=latest
+- name: format new volume
+  filesystem: fstype=xfs dev=/dev/{{mount_dev}}
+- name: edit fstab and mount the vol
+  action: mount name={{mount_dir}} src=/dev/{{mount_dev}} opts=noatime fstype=xfs state=mounted
